@@ -7,6 +7,7 @@ Set up google cloud
     - Create a key for your service account as you create the account. Choose JSON file format and name it "credentials.json"
 - Go to **Pub/Sub** and create a topic.
 - Create a **subscription** to your new topic.
+That's it to post data on pub\sub however you can do below extra steps if you want to send your data to BigQuery.
 - Create a **bucket** in (found under “Storage).
 - Create a **dataset** and a **table** in BigQuery with a schema that fit your data.
 - Create a **DataFlow from template** "Cloud Pub/Sub to BigQuery".
@@ -18,17 +19,18 @@ If you need help go to our **microservice** section of the [Getting started with
 Sample system in Sesam:
 ```json
 {
-  "_id": "gcp-pubsub-sink",
+  "_id": "<pipename>",
   "type": "system:microservice",
   "docker": {
+    "cpu_quota": 100,
     "environment": {
-      "GOOGLE_APPLICATION_CREDENTIALS": "credentials.json",
-      "GOOGLE_APPLICATION_CREDENTIALS_CONTENT": { Insert your Credentials from GCP
-      },
-      "PAYLOAD_KEY": "<optional attribute which part of entity send as payload (if you don't want to pass whole entity)>",
-      "PROJECT_ID": "<project id>"
+      "GOOGLE_APPLICATION_CREDENTIALS": "Credential.json",
+      "GOOGLE_APPLICATION_CREDENTIALS_CONTENT": "$SECRET(google_app_credentials_content)",
+      "PROJECT_ID": "$ENV(pubsub_project_id)",
+      "TOPIC": "$ENV(pubsub_topic)"
     },
     "image": "<dockerhub-username>/<repository>:<tag>",
+    "memory": 512,
     "port": 5000
   },
   "verify_ssl": true
@@ -39,19 +41,29 @@ Sample system in Sesam:
 Sample output pipe:
 ```json
 {
-  "_id": "target-endpoint",
+  "_id": "<pipe name>",
   "type": "pipe",
   "source": {
     "type": "dataset",
-    "dataset": "enriched-data"
+    "dataset": "<source dataset-name>"
   },
   "sink": {
     "type": "json",
-    "system": "gcp-pubsub-sink",
-    "url": "/<topic_id>"
+    "system": "<system name>",
+    "url": "/"
+  },
+  "transform": {
+    "type": "dtl",
+    "rules": {
+      "default": [
+        ["copy", "*",
+          ["list", "_deleted", "_hash", "_previous", "_ts", "_updated"]
+        ]
+      ]
+    }
   },
   "pump": {
-    "cron_expression": "0 0 1 1 ?"
+    "cron_expression": "55 * * * ?"
   }
 }
 ```
