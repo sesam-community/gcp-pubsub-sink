@@ -7,6 +7,7 @@ Set up google cloud
     - Create a key for your service account as you create the account. Choose JSON file format and name it "credentials.json"
 - Go to **Pub/Sub** and create a topic.
 - Create a **subscription** to your new topic.
+
 That's it to post data on pub\sub however you can do below extra steps if you want to send your data to BigQuery.
 - Create a **bucket** in (found under “Storage).
 - Create a **dataset** and a **table** in BigQuery with a schema that fit your data.
@@ -36,7 +37,7 @@ Sample system in Sesam:
   "verify_ssl": true
 }
 ```
-
+The secrets and environment variables are stored in **Datahub** --> **Variables** in the Sesam Node.
 
 Sample output pipe:
 ```json
